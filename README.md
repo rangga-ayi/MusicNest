@@ -21,27 +21,32 @@
 
 ## Fitur Utama
 
-### Pemutar Musik
+### Pemutar Musik & Audio Modern
 
 - Kontrol Play / Pause / Next / Prev
-- **Player bar** persisten di bawah layar, tersedia di semua halaman
+- **Player bar** persisten di bawah layar, tersedia di semua halaman dengan efek *glassmorphism backdrop-blur*
 - **Full Player** mode layar penuh, bisa dibuka dengan klik artwork
 - **Vinyl spin** — album art berputar seperti piringan hitam saat lagu diputar
 - **Seek bar** interaktif dengan dukungan klik & drag
 - **Kontrol volume** termasuk tombol mute
 - **Keyboard shortcuts**: `Space` (putar/jeda), `M` (mute), `Esc` (tutup Full Player)
+- **Pemulihan Sesi (Resume Playback)** — otomatis menyimpan lagu aktif, antrean, dan timestamp terakhir ke `localStorage` sehingga pemutaran dapat langsung dilanjutkan saat aplikasi dibuka kembali
+- **Media Session API** — terintegrasi dengan lock-screen dan notification center HP/laptop (judul, artis, album, artwork, dan kontrol media)
+- **Indikator Kualitas Audio** — badge real-time (Hi-Res Lossless, Lossless, AAC, MP3) di PlayerBar, FullPlayer, dan tracklist
+- **Ambient Artwork Glow** — pencahayaan pendaran warna yang membaur dengan sampul album di area hero dan halaman album
 
 ### Mode Pemutaran
 
 - **Shuffle** — mengacak urutan lagu dalam antrean aktif
 - **Shuffle All** — memuat dan memutarkan seluruh koleksi perpustakaan secara acak, lintas artis dan album
-- **Repeat Off / Repeat All / Repeat One** — tiga mode, siklus putar
+- **Repeat Off / Repeat All / Repeat One** — tiga mode siklus putar
 
 ### Manajemen Perpustakaan
 
 - **Pemindai Otomatis** (`/settings`) — mendeteksi semua file audio secara rekursif di `MUSIC_DIR`
-- **Rescan idempotent** — hanya memproses file yang berubah (berdasarkan `mtime` dan ukuran), tidak memproses ulang file yang sama
-- **Penghapusan otomatis** — lagu yang filenya sudah dihapus dari disk akan otomatis dihapus dari database
+- **Scan Lock & Rate Limiting** — endpoint scan diproteksi mutex lock (HTTP 409 jika scan sedang berjalan) serta token-bucket rate limiter (HTTP 429) untuk mencegah DoS
+- **Rescan idempotent** — hanya memproses file yang baru atau berubah (berdasarkan `mtime` dan ukuran)
+- **Penghapusan otomatis** — lagu yang filenya sudah dihapus dari disk akan otomatis dibersihkan dari database
 - **Format didukung:** `.mp3` · `.flac` · `.m4a` · `.m4b` · `.aac` · `.ogg` · `.opus` · `.wav` · `.wma`
 
 ### Pencarian
@@ -53,17 +58,17 @@
 
 ### Halaman & Navigasi
 
-| Halaman                             | Deskripsi                                          |
-| ----------------------------------- | -------------------------------------------------- |
-| **Beranda**                         | Hero banner album acak, daftar album, lagu terbaru |
-| **Artis** (`/artists`)              | Grid semua artis                                   |
-| **Halaman Artis** (`/artists/[id]`) | Foto, biografi, dan daftar album artis             |
-| **Album** (`/albums`)               | Grid semua album                                   |
-| **Halaman Album** (`/albums/[id]`)  | Sampul, daftar lagu, dan info album                |
-| **Favorit** (`/favorites`)          | Kumpulan lagu yang telah di-like                   |
-| **Playlist** (`/playlists`)         | Buat dan kelola playlist kustom                    |
-| **Pencarian** (`/search`)           | Hasil pencarian terkelompok (artis, album, lagu)   |
-| **Pengaturan** (`/settings`)        | Statistik perpustakaan & tombol scan               |
+| Halaman                             | Deskripsi                                                                    |
+| ----------------------------------- | ---------------------------------------------------------------------------- |
+| **Beranda**                         | Hero banner dengan ambient glow, ringkasan 4 statistik library, album & lagu |
+| **Artis** (`/artists`)              | Grid semua artis                                                             |
+| **Halaman Artis** (`/artists/[id]`) | Foto, biografi, diskografi album & singles, lagu teratas                     |
+| **Album** (`/albums`)               | Grid semua album dengan hover play button melayang                           |
+| **Halaman Album** (`/albums/[id]`)  | Header ambient glow, badge audio kualitas terbaik, tracklist tabel presisi   |
+| **Favorit** (`/favorites`)          | Kumpulan lagu yang telah di-like                                             |
+| **Playlist** (`/playlists`)         | Buat dan kelola playlist kustom                                              |
+| **Pencarian** (`/search`)           | Hasil pencarian terkelompok (artis, album, lagu)                             |
+| **Pengaturan** (`/settings`)        | Statistik perpustakaan & tombol scan dengan proteksi lock                    |
 
 ### Metadata Artis Otomatis
 
@@ -76,7 +81,7 @@ Saat halaman artis dibuka pertama kali, MusicNest otomatis mengambil dan menyimp
 ### Full Player (Layar Penuh)
 
 - **3 slide geser** (swipe kiri/kanan atau panah desktop):
-  1. **Cover** — vinyl art berputar
+  1. **Cover** — vinyl art berputar, judul, artis, dan badge kualitas audio
   2. **Lirik** — lirik `.lrc` sinkron dengan waktu, auto-scroll
   3. **Metadata** — informasi teknis file (format, bitrate, sample rate, ukuran)
 - **Tombol Favorit**, **Tambah ke Playlist**, **Shuffle**, dan **Repeat** langsung di Full Player
@@ -84,17 +89,20 @@ Saat halaman artis dibuka pertama kali, MusicNest otomatis mengambil dan menyimp
 
 ### Responsif & Aksesibel
 
-- **Mobile-first** dengan bottom navigation bar untuk layar kecil
-- **Desktop sidebar** dengan navigasi dan tombol aksi cepat
-- Mendukung **`prefers-reduced-motion`** — semua animasi dimatikan jika pengguna memilih ini
+- **Mobile-first** dengan bottom navigation bar ber-glassmorphism untuk layar kecil
+- **Desktop sidebar** sticky dengan navigasi dan tombol aksi cepat
+- **Tracklist Presisi** — nomor lagu berganti tombol putar saat hover, equalizer animasi aktif saat playing, durasi menggunakan format `tabular-nums`
+- Mendukung **`prefers-reduced-motion`** — semua animasi dinonaktifkan jika pengguna memilih ini
 - **`focus-visible`** ring untuk navigasi keyboard aksesibel
 
 ### Teknis & Infrastruktur
 
 - **Streaming audio** dengan dukungan HTTP `Range` requests (seek tanpa buffering ulang penuh)
-- **Transcode otomatis** file ALAC (`.m4a`) ke AAC 256kbps via `ffmpeg`, di-cache di `data/transcodes/`
+- **Pre-transcode latar belakang** — file ALAC (`.m4a`) di-transcode ke AAC saat library scan dan di-cache di `data/transcodes/`, menjamin request streaming instan tanpa memblokir server
+- **Bebas command injection** — eksekusi `ffmpeg` menggunakan `child_process.execFile` dengan array argumen terisolasi
 - **PM2-ready** untuk menjalankan aplikasi sebagai background service di Windows
 - **Akses LAN** — bisa diakses dari perangkat lain di jaringan yang sama
+- **Continuous Integration (CI)** — GitHub Actions menjalankan linter, build, dan Playwright test otomatis pada setiap push/PR
 
 ---
 
@@ -131,20 +139,39 @@ Saat halaman artis dibuka pertama kali, MusicNest otomatis mengambil dan menyimp
 
 ## Instalasi & Setup
 
-### 1. Clone Repositori
+### Quickstart (Dataset Demo)
+
+Untuk mencoba aplikasi secara instan dengan dataset demo tanpa perlu memiliki koleksi musik fisik:
+
+```bash
+git clone https://github.com/RLA07/MusicNest.git
+cd musicnest
+npm install
+cp .env.example .env.local # sesuaikan kredensial MySQL jika perlu
+npm run seed
+npm run dev
+```
+
+Buka **http://localhost:3030** di browser.
+
+---
+
+### Setup Manual & Koleksi Lengkap
+
+#### 1. Clone Repositori
 
 ```bash
 git clone https://github.com/RLA07/MusicNest.git
 cd musicnest
 ```
 
-### 2. Instal Dependensi
+#### 2. Instal Dependensi
 
 ```bash
 npm install
 ```
 
-### 3. Konfigurasi Environment
+#### 3. Konfigurasi Environment
 
 Salin file contoh, sesuaikan:
 
@@ -152,34 +179,62 @@ Salin file contoh, sesuaikan:
 cp .env.example .env.local
 ```
 
-Buka `.env.local` dan isi:
+Buka `.env.local` dan sesuaikan variabel koneksi:
 
 ```env
-MUSIC_DIR=D:\Music
+MUSIC_DIR=./music # Path absolut atau relatif ke folder koleksi audio
 DATA_DIR=./data
 MYSQL_HOST=localhost
 MYSQL_PORT=3306
 MYSQL_USER=root
 MYSQL_PASSWORD=password_kamu
 MYSQL_DATABASE=music_nest
+ALLOWED_DEV_ORIGINS=192.168.1.* # Opsional: akses LAN pada mode dev
 ```
 
-### 4. Buat Database MySQL
+#### 4. Buat Database MySQL
 
-Skema dibuat otomatis saat pertama kali dijalankan. Pastikan database kosong sudah ada:
+Skema dibuat otomatis saat pertama kali aplikasi atau seed dijalankan. Pastikan database kosong sudah dibuat:
 
 ```sql
 CREATE DATABASE music_nest CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-### 5. Build & Jalankan
+#### 5. Siapkan Data Demo atau Pindai Library
 
+- **Opsi A: Pakai Dataset Demo**
+  ```bash
+  npm run seed
+  ```
+  Menghasilkan sample audio, artwork, dan mengisi database dengan beberapa lagu demo untuk pengetesan cepat.
+
+- **Opsi B: Pindai Koleksi Sendiri**
+  Taruh file musik ke dalam folder `MUSIC_DIR`, lalu jalankan:
+  ```bash
+  npm run scan
+  ```
+
+#### 6. Build & Jalankan
+
+Mode pengembangan:
+```bash
+npm run dev
+```
+
+Mode produksi:
 ```bash
 npm run build
 npm start
 ```
 
 Aplikasi berjalan di **http://localhost:3030**.
+
+#### 7. Testing & Lint
+
+```bash
+npm run lint   # Type-check TypeScript strict
+npm test       # Playwright end-to-end smoke tests (port 3031)
+```
 
 ---
 
@@ -226,8 +281,8 @@ npm run scan
 Tempatkan `.lrc` di folder yang sama dengan file audio, nama file harus sama:
 
 ```
-Music/Artist/Album/01 - Lagu Indah.mp3
-Music/Artist/Album/01 - Lagu Indah.lrc
+music/Artist/Album/01 - Lagu Indah.mp3
+music/Artist/Album/01 - Lagu Indah.lrc
 ```
 
 Jalankan scan ulang, buka Full Player → slide **Lirik**.
@@ -238,20 +293,27 @@ Jalankan scan ulang, buka Full Player → slide **Lirik**.
 
 ```
 musicnest/
-├── app/                    # Next.js App Router (halaman & API)
-│   ├── api/                # Routes: artwork, favorite, lyrics, playlist, scan, search, song, stream
+├── .github/                # CI workflow (GitHub Actions)
+├── app/                    # Next.js App Router (halaman, API, loading, error, icon)
+│   ├── api/                # Routes: artwork, favorite, lyrics, playlists, scan, search, song, stream
 │   ├── albums/             # Daftar & detail album
 │   ├── artists/            # Daftar & detail artis
 │   ├── favorites/          # Lagu favorit
 │   ├── playlists/          # Daftar & detail playlist
 │   ├── search/             # Hasil pencarian
 │   ├── settings/           # Pengaturan & scan
-│   └── page.tsx            # Beranda
-├── components/             # React (PlayerProvider, PlayerBar, FullPlayer, Sidebar, MobileNav, SearchBar, SongList)
-├── lib/                    # Utilities (db, schema, scanner, metadata, transcode, search, lyrics, artwork)
-├── data/                   # Runtime: artworks/ → transcodes/
+│   ├── icon.svg            # Favicon SVG aplikasi
+│   ├── loading.tsx         # Global loading skeleton
+│   ├── error.tsx           # Global error boundary
+│   └── page.tsx            # Beranda dengan statistik & ambient glow
+├── components/             # React (PlayerProvider, PlayerBar, FullPlayer, Sidebar, AudioBadge, MediaCard, SongList)
+├── lib/                    # Utilities (db, schema, scanner, metadata, transcode, rateLimit, audioBadge, search, lyrics)
+├── scripts/                # Scripts (seed.ts untuk dataset demo)
+├── tests/                  # Playwright end-to-end smoke tests
+├── data/                   # Runtime data di-ignore (artworks/ → transcodes/)
 ├── .env.example
 ├── ecosystem.config.cjs
+├── playwright.config.ts
 └── package.json
 ```
 
@@ -280,12 +342,10 @@ artists, albums, songs, lyrics, favorites, playlists, playlist_songs, settings
 
 | Keterbatasan               | Keterangan                                                                                                                                   |
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Single-user**            | Tidak ada autentikasi. Siapapun yang bisa mengakses IP:port bisa pakai.                                                                      |
-| **Transcode blocking**     | Transcode ALAC dilakukan sinkron (`execSync`). Jika beberapa pengguna meminta lagu ALAC yang belum di-cache bersamaan, server akan melambat. |
-| **Tidak ada HTTPS bawaan** | HTTP saja. Untuk HTTPS, pasang reverse proxy (Nginx/Caddy) di depan.                                                                         |
-| **Windows-first**          | Dioptimalkan dan diuji di Windows. Linux/macOS belum diverifikasi.                                                                           |
-| **Shuffle All load**       | Memuat hingga 500 lagu sekalih ke memori browser.                                                                                            |
-| **Metadata artis**         | Bergantung pada API eksternal (Deezer, iTunes, Wikipedia) yang butuh koneksi internet.                                                       |
+| **Single-user**            | Tidak ada autentikasi bawaan. Disengaja untuk arsitektur personal/LAN (dapat diproteksi via Cloudflare Access/reverse proxy jika publik).  |
+| **Tidak ada HTTPS bawaan** | Server berjalan plain HTTP (port 3030). Untuk HTTPS publik, disarankan menggunakan Cloudflare Tunnel atau reverse proxy (Caddy/Nginx).     |
+| **Shuffle All memory**     | Memuat hingga 500 lagu acak sekaligus ke memori browser untuk antrean pemutaran instan.                                                      |
+| **Metadata artis**         | Bergantung pada API eksternal (Deezer, iTunes, Wikipedia) yang membutuhkan koneksi internet saat artis pertama kali dibuka.                  |
 
 ---
 
@@ -293,13 +353,15 @@ artists, albums, songs, lyrics, favorites, playlists, playlist_songs, settings
 
 | Komponen            | Teknologi                                                                    |
 | ------------------- | ---------------------------------------------------------------------------- |
-| **Framework**       | [Next.js 16](https://nextjs.org/) (App Router)                               |
+| **Framework**       | [Next.js 16](https://nextjs.org/) (App Router + Turbopack)                   |
 | **UI**              | [React 19](https://react.dev/) + [Tailwind CSS v4](https://tailwindcss.com/) |
-| **Database**        | MySQL 8+ via `mysql2`                                                        |
+| **Database**        | MySQL 8+ via `mysql2` (Pool koneksi + bootstrap schema otomatis)             |
 | **Metadata Audio**  | `music-metadata`                                                             |
-| **Transcode**       | `ffmpeg` + `ffprobe` via `child_process.execSync`                            |
+| **Transcode**       | `ffmpeg` + `ffprobe` via `child_process.execFile` (Pre-transcode saat scan)  |
 | **Pencarian**       | MySQL FULLTEXT Boolean Mode + Fuzzy `LIKE` fallback                          |
 | **Optimasi Gambar** | `sharp`                                                                      |
+| **Testing**         | `@playwright/test` (End-to-End smoke tests)                                  |
+| **CI/CD**           | GitHub Actions (lint, build, smoke tests)                                    |
 | **Process Manager** | PM2                                                                          |
 | **Font**            | DM Sans                                                                      |
 
