@@ -14,7 +14,8 @@ export default async function PlaylistDetail({ params }: { params: Promise<{ id:
   const [pl] = await pool.query<any[]>('SELECT id, name FROM playlists WHERE id = ?', [id]);
   if (!pl[0]) notFound();
   const [songs] = await pool.query<any[]>(
-    `SELECT s.id, s.title, s.duration_ms, al.name AS album, ar.name AS artist, al.artwork
+    `SELECT s.id, s.title, s.duration_ms, s.track_no, s.format, s.bitrate, s.sample_rate,
+            al.name AS album, ar.name AS artist, al.artwork
      FROM playlist_songs ps
      JOIN songs s ON s.id = ps.song_id
      JOIN albums al ON s.album_id = al.id
@@ -25,9 +26,15 @@ export default async function PlaylistDetail({ params }: { params: Promise<{ id:
   const favs = await getFavIds();
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">{pl[0].name}</h1>
-        <div className="flex gap-2">
+      <div className="relative overflow-hidden rounded-3xl border border-white/[0.08] bg-surface/50 backdrop-blur-xl p-6 sm:p-8 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl shadow-black/30">
+        <div>
+          <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/20">
+            Playlist
+          </span>
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mt-2">{pl[0].name}</h1>
+          <p className="text-muted text-sm mt-1">{songs.length} lagu</p>
+        </div>
+        <div className="flex items-center gap-2.5">
           <AddSongs playlistId={id} current={songs.map((s: any) => s.id)} />
           <DeletePlaylist id={id} name={pl[0].name} />
         </div>

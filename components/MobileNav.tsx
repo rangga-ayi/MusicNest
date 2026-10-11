@@ -14,7 +14,7 @@ const ITEMS = [
 export default function MobileNav() {
   const pathname = usePathname();
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 border-t border-border bg-surface/95 backdrop-blur pb-[env(safe-area-inset-bottom)]" aria-label="Navigasi utama">
+    <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 border-t border-white/[0.07] bg-[#0c0c10]/85 backdrop-blur-2xl pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_24px_rgba(0,0,0,0.6)]" aria-label="Navigasi utama">
       <div className="flex">
         {ITEMS.map((it) => {
           const active = it.href === '/' ? pathname === '/' : pathname.startsWith(it.href);

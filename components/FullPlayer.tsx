@@ -6,6 +6,7 @@ import { parseLrc } from '@/lib/lyrics';
 import type { LrcLine } from '@/lib/lyrics';
 import type { SongMeta } from '@/lib/types';
 import PlaylistPickerModal from './PlaylistPickerModal';
+import AudioBadge from './AudioBadge';
 
 /* ─────────────────────── helpers ─────────────────────── */
 
@@ -362,8 +363,11 @@ export default function FullPlayer({ onClose }: { onClose: () => void }) {
             )}
 
             <div className="text-center max-w-xs sm:max-w-sm px-2">
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight leading-tight text-balance">{c.title}</h2>
-              <p className="text-muted mt-1 text-xs sm:text-sm">{c.artist} — {c.album}</p>
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight leading-tight text-balance text-white">{c.title}</h2>
+              <div className="flex items-center justify-center gap-2 mt-1.5 flex-wrap">
+                <p className="text-muted text-xs sm:text-sm">{c.artist} — {c.album}</p>
+                <AudioBadge format={c.format} sampleRate={c.sample_rate} bitrate={c.bitrate} size="xs" />
+              </div>
             </div>
           </div>
 

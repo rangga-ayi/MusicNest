@@ -7,7 +7,8 @@ export const dynamic = 'force-dynamic';
 export default async function FavoritesPage() {
   await ensureSchema();
   const [songs] = await pool.query<any[]>(
-    `SELECT s.id, s.title, s.duration_ms, al.name AS album, ar.name AS artist, al.artwork
+    `SELECT s.id, s.title, s.duration_ms, s.track_no, s.format, s.bitrate, s.sample_rate,
+            al.name AS album, ar.name AS artist, al.artwork
      FROM favorites f
      JOIN songs s ON f.song_id = s.id
      JOIN albums al ON s.album_id = al.id
@@ -16,7 +17,13 @@ export default async function FavoritesPage() {
   );
   return (
     <div>
-      <h1 className="text-2xl font-semibold mb-6">Favorites</h1>
+      <div className="relative overflow-hidden rounded-3xl border border-white/[0.08] bg-surface/50 backdrop-blur-xl p-6 sm:p-8 mb-8 shadow-xl shadow-black/30">
+        <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/20">
+          Koleksi
+        </span>
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mt-2">Lagu Favorit</h1>
+        <p className="text-muted text-sm mt-1">{songs.length} lagu yang kamu sukai</p>
+      </div>
       {songs.length === 0
         ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">

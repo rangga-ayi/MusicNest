@@ -212,18 +212,32 @@ export default function ArtistPageClient({ artist, albums, songs }: ArtistPageCl
                     }
                     className="group w-full flex items-center gap-3 md:gap-4 p-2.5 rounded-xl hover:bg-surface-hover transition-colors text-left cursor-pointer"
                   >
-                    {/* Index Number / Play Icon */}
+                    {/* Index Number / Play Icon / Equalizer */}
                     <span className="w-6 text-center text-xs font-semibold text-muted group-hover:hidden">
-                      {idx + 1}
+                      {isCurrentPlaying ? (
+                        <span className="inline-flex items-end gap-[2px] h-3.5 mx-auto" aria-hidden="true">
+                          <span className="eq-bar w-[2.5px] h-3.5 bg-accent rounded-sm" style={{ animationDelay: '0ms' }} />
+                          <span className="eq-bar w-[2.5px] h-3.5 bg-accent rounded-sm" style={{ animationDelay: '150ms' }} />
+                          <span className="eq-bar w-[2.5px] h-3.5 bg-accent rounded-sm" style={{ animationDelay: '300ms' }} />
+                        </span>
+                      ) : (
+                        idx + 1
+                      )}
                     </span>
                     <span className="w-6 text-center text-accent hidden group-hover:inline-block">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="mx-auto">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
+                      {isCurrentPlaying ? (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="mx-auto">
+                          <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                        </svg>
+                      ) : (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="mx-auto">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      )}
                     </span>
 
                     {/* Song Artwork Thumbnail */}
-                    <div className="h-11 w-11 rounded-lg bg-surface-hover overflow-hidden shrink-0 relative flex items-center justify-center text-muted">
+                    <div className="h-11 w-11 rounded-lg bg-surface-hover overflow-hidden shrink-0 relative flex items-center justify-center text-muted border border-white/[0.06]">
                       {s.artwork ? (
                         <Image
                           src={`/api/artwork/${s.artwork}`}
@@ -236,13 +250,6 @@ export default function ArtistPageClient({ artist, albums, songs }: ArtistPageCl
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z" />
                         </svg>
-                      )}
-                      {isCurrentPlaying && (
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-accent">
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                          </svg>
-                        </div>
                       )}
                     </div>
 
@@ -263,7 +270,7 @@ export default function ArtistPageClient({ artist, albums, songs }: ArtistPageCl
                     </div>
 
                     {/* Duration */}
-                    <span className="text-xs text-muted font-mono shrink-0">{fmtDuration(s.duration_ms)}</span>
+                    <span className="text-xs text-muted font-mono tabular-nums shrink-0">{fmtDuration(s.duration_ms)}</span>
                   </button>
                 );
               })}

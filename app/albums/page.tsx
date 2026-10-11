@@ -12,7 +12,8 @@ export default async function AlbumsPage() {
      ORDER BY al.name`
   );
   const [songs] = await pool.query<any[]>(
-    `SELECT s.id, s.title, s.duration_ms, s.album_id, al.name AS album, ar.name AS artist, al.artwork
+    `SELECT s.id, s.title, s.duration_ms, s.track_no, s.format, s.bitrate, s.sample_rate,
+            s.album_id, al.name AS album, ar.name AS artist, al.artwork
      FROM songs s
      JOIN albums al ON s.album_id = al.id
      JOIN artists ar ON al.artist_id = ar.id

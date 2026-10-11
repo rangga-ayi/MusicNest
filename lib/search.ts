@@ -22,6 +22,9 @@ export interface RawSongResult {
   album: string;
   artwork: string | null;
   artist: string;
+  format?: string | null;
+  bitrate?: number | null;
+  sample_rate?: number | null;
 }
 
 export interface SearchData {
@@ -152,7 +155,8 @@ export async function executeSearch(query: string, limit: number = 30): Promise<
   if (canUseFts) {
     try {
       const [ftsSongs] = await pool.query<any[]>(
-        `SELECT s.id, s.title, s.duration_ms, s.track_no, al.name AS album, al.artwork, ar.name AS artist,
+        `SELECT s.id, s.title, s.duration_ms, s.track_no, s.format, s.bitrate, s.sample_rate,
+                al.name AS album, al.artwork, ar.name AS artist,
            (MATCH(s.title) AGAINST(? IN BOOLEAN MODE) * 4 +
             MATCH(ar.name) AGAINST(? IN BOOLEAN MODE) * 2 +
             MATCH(al.name) AGAINST(? IN BOOLEAN MODE) * 1 +
@@ -176,7 +180,8 @@ export async function executeSearch(query: string, limit: number = 30): Promise<
   // Fallback LIKE untuk Songs
   if (songs.length === 0) {
     const [likeSongs] = await pool.query<any[]>(
-      `SELECT s.id, s.title, s.duration_ms, s.track_no, al.name AS album, al.artwork, ar.name AS artist,
+      `SELECT s.id, s.title, s.duration_ms, s.track_no, s.format, s.bitrate, s.sample_rate,
+              al.name AS album, al.artwork, ar.name AS artist,
          CASE 
            WHEN LOWER(s.title) = ? THEN 1
            WHEN s.title LIKE ? THEN 2

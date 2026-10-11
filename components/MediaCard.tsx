@@ -19,8 +19,8 @@ export default function MediaCard({ href, artwork, title, subtitle, songs, playI
   const p = usePlayer();
   const canPlay = !!songs?.length;
   return (
-    <Link href={href} className="group relative flex flex-col w-full rounded-xl p-3 bg-surface hover:bg-surface-hover transition-all card-hover active:scale-[0.98]">
-      <div className="relative">
+    <Link href={href} className="group relative flex flex-col w-full rounded-2xl p-3 bg-surface/75 hover:bg-surface-hover/80 border border-white/[0.05] hover:border-white/[0.12] transition-all duration-300 card-hover active:scale-[0.98] shadow-lg shadow-black/30 backdrop-blur-sm">
+      <div className="relative overflow-hidden rounded-xl">
         <ArtworkCard artwork={artwork} alt={title} priority={priority} />
         {canPlay && (
           <button
@@ -30,16 +30,16 @@ export default function MediaCard({ href, artwork, title, subtitle, songs, playI
               p.setQueueAndPlay(songs!, playIndex);
             }}
             aria-label={`Putar ${title}`}
-            className="absolute bottom-2 right-2 rounded-full bg-accent text-on-accent p-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 hover:scale-105 focus-visible:opacity-100 transition-all duration-200 cursor-pointer play-on-hover"
+            className="absolute bottom-3 right-3 rounded-full bg-accent text-on-accent p-3.5 shadow-2xl shadow-black/80 hover:shadow-accent/40 opacity-0 translate-y-3 scale-90 group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 hover:scale-110 active:scale-95 focus-visible:opacity-100 transition-all duration-300 ease-out cursor-pointer z-10 play-on-hover"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M8 5v14l11-7z" />
             </svg>
           </button>
         )}
       </div>
-      <p className="mt-3 font-medium text-sm truncate">{title}</p>
-      {subtitle && <p className="text-sm text-muted truncate mt-0.5">{subtitle}</p>}
+      <p className="mt-3 font-semibold text-sm truncate text-foreground group-hover:text-accent transition-colors">{title}</p>
+      {subtitle && <p className="text-xs text-muted truncate mt-0.5">{subtitle}</p>}
     </Link>
   );
 }

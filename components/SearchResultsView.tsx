@@ -19,6 +19,9 @@ interface SearchResultsViewProps {
     album: string;
     artist: string;
     artwork?: string | null;
+    format?: string | null;
+    bitrate?: number | null;
+    sample_rate?: number | null;
   }>;
   topResult: { type: 'artist' | 'album' | 'song'; item: any } | null;
 }
@@ -61,6 +64,9 @@ export default function SearchResultsView({
     album: s.album,
     artwork: s.artwork ?? null,
     duration_ms: s.duration_ms,
+    format: s.format,
+    bitrate: s.bitrate,
+    sample_rate: s.sample_rate,
   }));
 
   return (

@@ -1,6 +1,7 @@
 'use client';
 import { usePlayer } from './PlayerProvider';
 import { fmtDuration } from '@/lib/format';
+import AudioBadge from './AudioBadge';
 
 const ICON = {
   prev: <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z" />,
@@ -30,29 +31,32 @@ export default function PlayerBar({ onExpand }: { onExpand?: () => void }) {
   return (
     <div className="fixed bottom-0 inset-x-0 z-40 md:z-40">
       {/* Mobile: compact bar di atas bottom-nav */}
-      <div className="md:hidden fixed bottom-[62px] inset-x-0 flex items-center gap-3 px-3 pt-2.5 pb-2 border-t border-border bg-surface/95 backdrop-blur">
+      <div className="md:hidden fixed bottom-[62px] inset-x-0 flex items-center gap-3 px-3.5 pt-2.5 pb-2 border-t border-white/[0.08] bg-[#0c0c10]/90 backdrop-blur-2xl shadow-[0_-4px_24px_rgba(0,0,0,0.5)]">
         <button onClick={onExpand} className="flex items-center gap-3 min-w-0 flex-1 text-left group">
           <div className="relative shrink-0">
             {p.current.artwork ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={`/api/artwork/${p.current.artwork}`} alt="" className={`h-11 w-11 rounded-full object-cover ${p.isPlaying ? 'vinyl-spin' : ''}`} />
+              <img src={`/api/artwork/${p.current.artwork}`} alt="" className={`h-11 w-11 rounded-full object-cover ring-1 ring-white/10 ${p.isPlaying ? 'vinyl-spin' : ''}`} />
             ) : (
-              <div className="h-11 w-11 rounded-full bg-surface-hover" />
+              <div className="h-11 w-11 rounded-full bg-surface-hover ring-1 ring-white/10" />
             )}
             {p.isPlaying && (
-              <span className="absolute inset-0 rounded-full ring-1 ring-black/30" aria-hidden="true" />
+              <span className="absolute inset-0 rounded-full ring-1 ring-black/40" aria-hidden="true" />
             )}
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium group-hover:underline">{p.current.title}</p>
-            <p className="truncate text-xs text-muted">{p.current.artist}</p>
+            <p className="truncate text-sm font-semibold text-foreground group-hover:underline">{p.current.title}</p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <p className="truncate text-xs text-muted">{p.current.artist}</p>
+              <AudioBadge format={p.current.format} sampleRate={p.current.sample_rate} bitrate={p.current.bitrate} size="xs" />
+            </div>
           </div>
         </button>
         <div className="flex items-center gap-2 shrink-0">
           <button onClick={() => p.playPrev()} aria-label="Lagu sebelumnya" className="text-muted hover:text-foreground transition-colors p-1 cursor-pointer active:scale-90">
             <Icon name="prev" />
           </button>
-          <button onClick={p.toggle} aria-label={p.isPlaying ? 'Jeda' : 'Putar'} className="rounded-full bg-accent text-on-accent p-2.5 hover:bg-accent-hover active:scale-90 transition-all cursor-pointer">
+          <button onClick={p.toggle} aria-label={p.isPlaying ? 'Jeda' : 'Putar'} className="rounded-full bg-accent text-on-accent p-2.5 hover:bg-accent-hover active:scale-90 transition-all cursor-pointer shadow-lg shadow-accent/25">
             <Icon name={p.isPlaying ? 'pause' : 'play'} size={22} />
           </button>
           <button onClick={() => p.playNext()} aria-label="Lagu berikutnya" className="text-muted hover:text-foreground transition-colors p-1 cursor-pointer active:scale-90">
@@ -62,23 +66,26 @@ export default function PlayerBar({ onExpand }: { onExpand?: () => void }) {
       </div>
 
       {/* Desktop: full bar */}
-      <div className="hidden md:flex items-center gap-4 px-4 py-3 border-t border-border bg-surface/95 backdrop-blur">
-        {/* kiri: info + vinyl */}
-        <button onClick={onExpand} className="flex items-center gap-3 min-w-0 w-[26%] text-left group">
+      <div className="hidden md:flex items-center gap-4 px-5 py-3 border-t border-white/[0.08] bg-[#0c0c10]/85 backdrop-blur-2xl shadow-[0_-8px_32px_rgba(0,0,0,0.6)]">
+        {/* kiri: info + vinyl + audio badge */}
+        <button onClick={onExpand} className="flex items-center gap-3.5 min-w-0 w-[28%] text-left group">
           <div className="relative shrink-0">
             {p.current.artwork ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={`/api/artwork/${p.current.artwork}`} alt="" className={`h-12 w-12 rounded-full object-cover ${p.isPlaying ? 'vinyl-spin' : ''}`} />
+              <img src={`/api/artwork/${p.current.artwork}`} alt="" className={`h-12 w-12 rounded-full object-cover ring-1 ring-white/10 shadow-md ${p.isPlaying ? 'vinyl-spin' : ''}`} />
             ) : (
-              <div className="h-12 w-12 rounded-full bg-surface-hover" />
+              <div className="h-12 w-12 rounded-full bg-surface-hover ring-1 ring-white/10" />
             )}
             {p.isPlaying && (
-              <span className="absolute inset-0 rounded-full ring-1 ring-black/30" aria-hidden="true" />
+              <span className="absolute inset-0 rounded-full ring-1 ring-black/40" aria-hidden="true" />
             )}
           </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium group-hover:underline">{p.current.title}</p>
-            <p className="truncate text-xs text-muted">{p.current.artist}</p>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-foreground group-hover:underline">{p.current.title}</p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <p className="truncate text-xs text-muted">{p.current.artist}</p>
+              <AudioBadge format={p.current.format} sampleRate={p.current.sample_rate} bitrate={p.current.bitrate} size="xs" />
+            </div>
           </div>
         </button>
 

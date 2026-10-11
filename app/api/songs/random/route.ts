@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
     await ensureSchema();
     const limit = Math.min(Number(req.nextUrl.searchParams.get('limit') ?? 500), 1000);
     const [rows] = await pool.query<any[]>(
-      `SELECT s.id, s.title, s.duration_ms, s.track_no, s.disc_no, s.album_id,
+      `SELECT s.id, s.title, s.duration_ms, s.track_no, s.disc_no, s.format, s.bitrate, s.sample_rate, s.album_id,
               al.name AS album, ar.name AS artist, al.artwork
        FROM songs s
        JOIN albums al ON s.album_id = al.id
