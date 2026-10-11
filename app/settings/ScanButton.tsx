@@ -13,11 +13,21 @@ export default function ScanButton() {
     try {
       const res = await fetch('/api/scan', { method: 'POST' });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) {
+        if (res.status === 409) {
+          setResult(data.error || 'Proses pemindaian sedang berjalan. Harap tunggu hingga selesai.');
+          return;
+        }
+        if (res.status === 429) {
+          setResult(data.error || 'Terlalu banyak permintaan pemindaian. Silakan tunggu beberapa saat.');
+          return;
+        }
+        throw new Error(data.error || 'Gagal melakukan pemindaian.');
+      }
       setResult(`${data.files} files — ${data.artists} artists, ${data.albums} albums, ${data.songs} songs. New: ${data.newSongs}, Updated: ${data.updated}, Removed: ${data.removed}.`);
       router.refresh();
     } catch (e: any) {
-      setResult(`Error: ${e.message}`);
+      setResult(`Gagal: ${e.message}`);
     } finally {
       setRunning(false);
     }

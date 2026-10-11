@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+test-results/
+playwright-report/
 
 # next.js
 /.next/
@@ -37,9 +39,14 @@ yarn-error.log*
 
 # runtime data (artworks hasil scan)
 /data
+data/
 
-# library musik (tidak di-commit)
+# library musik & konfigurasi lokal (tidak di-commit)
 /Music
+Music2/
+music/
+[Mm]usic*/
+my.cnf
 
 # vercel
 .vercel
@@ -52,3 +59,4 @@ next-env.d.ts
 CLAUDE.md
 .playwright-mcp
 .vscode/
+.codegraph/

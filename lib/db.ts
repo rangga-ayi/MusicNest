@@ -2,7 +2,7 @@ import mysql from 'mysql2/promise';
 import fs from 'fs';
 import path from 'path';
 
-export const MUSIC_DIR = process.env.MUSIC_DIR ?? path.join(process.cwd(), 'Music');
+export const MUSIC_DIR = process.env.MUSIC_DIR ?? path.join(process.cwd(), 'music');
 export const DATA_DIR  = process.env.DATA_DIR  ?? path.join(process.cwd(), 'data');
 fs.mkdirSync(path.join(DATA_DIR, 'artworks'), { recursive: true });
 
@@ -30,8 +30,17 @@ export async function ensureSchema() {
     .split(/;\s*\n/).map(s => s.trim()).filter(Boolean);
   const conn = await pool.getConnection();
   try {
-    for (const s of stmts) await conn.query(s);
-    // Tambah index FTS jika tabel sudah terlanjur dibuat tanpa index FTS
+    // 1. Eksekusi skema kritis (tabel utama): gagalkan startup jika ada error
+    for (const s of stmts) {
+      try {
+        await conn.query(s);
+      } catch (err: any) {
+        console.error(`[ensureSchema] Critical schema statement failed:\n${s}\nError: ${err?.message ?? err}`);
+        throw new Error(`Inisialisasi skema database kritis gagal pada query: "${s}". Pesan: ${err?.message ?? err}`);
+      }
+    }
+
+    // 2. Eksekusi migrasi tambahan: log setiap kegagalan (misal index/kolom sudah ada)
     const migrationQueries = [
       'ALTER TABLE artists ADD FULLTEXT INDEX idx_fts_artist (name)',
       'ALTER TABLE albums ADD FULLTEXT INDEX idx_fts_album (name)',
@@ -41,7 +50,12 @@ export async function ensureSchema() {
       'ALTER TABLE albums ADD COLUMN description TEXT NULL',
     ];
     for (const q of migrationQueries) {
-      try { await conn.query(q); } catch {}
+      try {
+        await conn.query(q);
+      } catch (err: any) {
+        // Jangan menelan error tanpa jejak: selalu log query yang gagal
+        console.error(`[ensureSchema] Migration query failed: "${q}" - ${err?.message ?? err}`);
+      }
     }
   } finally {
     conn.release();

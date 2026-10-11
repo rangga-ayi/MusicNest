@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ensureSchema } from '@/lib/db';
 import { executeSearch } from '@/lib/search';
+import { searchLimiter, rateLimitResponse } from '@/lib/rateLimit';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
+  const rate = searchLimiter.check(req);
+  if (!rate.success) {
+    return rateLimitResponse(rate.retryAfter);
+  }
+
   const { searchParams } = new URL(req.url);
   const q = (searchParams.get('q') ?? '').trim();
   const limitParam = parseInt(searchParams.get('limit') ?? '5', 10);

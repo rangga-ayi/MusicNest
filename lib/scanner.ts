@@ -1,16 +1,67 @@
 import fs from 'fs';
 import path from 'path';
 import type { PoolConnection, ResultSetHeader } from 'mysql2/promise';
-import { pool, MUSIC_DIR } from './db';
+import { pool, MUSIC_DIR, DATA_DIR } from './db';
 import { parseMetadata, folderParts, resolveArtist, resolveAlbum, resolveTitle } from './metadata';
 import { saveArtwork, findFolderArtwork, findArtistThumbnail } from './artwork';
-import { playablePathFor } from './transcode';
+import { playablePathFor, isAlacCodec, transcodeSong } from './transcode';
 
 const AUDIO_EXT = new Set(['.mp3', '.flac', '.m4a', '.m4b', '.m4p', '.aac', '.ogg', '.opus', '.wav', '.wma']);
 
 export interface ScanResult {
   files: number; newSongs: number; updated: number; removed: number;
   artists: number; albums: number; songs: number;
+}
+
+export class ScanLockError extends Error {
+  constructor(message = 'Proses pemindaian sedang berjalan. Harap tunggu hingga selesai.') {
+    super(message);
+    this.name = 'ScanLockError';
+  }
+}
+
+const LOCK_FILE = path.join(DATA_DIR, '.scan.lock');
+let inMemoryScanActive = false;
+
+/** Cek apakah pemindaian sedang berlangsung. */
+export function isScanLocked(): boolean {
+  if (inMemoryScanActive) return true;
+  if (!fs.existsSync(LOCK_FILE)) return false;
+  try {
+    const stat = fs.statSync(LOCK_FILE);
+    // Jika lock lebih dari 30 menit, anggap proses sebelumnya mati mendadak (stale)
+    if (Date.now() - stat.mtimeMs > 30 * 60 * 1000) {
+      try { fs.unlinkSync(LOCK_FILE); } catch {}
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Pasang lock sebelum scan berjalan. */
+export function acquireScanLock(): void {
+  if (inMemoryScanActive || isScanLocked()) {
+    throw new ScanLockError();
+  }
+  inMemoryScanActive = true;
+  try {
+    fs.writeFileSync(LOCK_FILE, JSON.stringify({ pid: process.pid, time: Date.now() }), { flag: 'w' });
+  } catch (err) {
+    inMemoryScanActive = false;
+    throw err;
+  }
+}
+
+/** Lepas lock setelah scan selesai atau gagal. */
+export function releaseScanLock(): void {
+  inMemoryScanActive = false;
+  try {
+    if (fs.existsSync(LOCK_FILE)) {
+      fs.unlinkSync(LOCK_FILE);
+    }
+  } catch {}
 }
 
 /** Rekursif kumpulkan file audio di MUSIC_DIR. */
@@ -65,6 +116,8 @@ function extMime(p: string): string {
 }
 
 export async function scanLibrary(): Promise<ScanResult> {
+  acquireScanLock();
+
   const files = walk(MUSIC_DIR);
   const onDisk = new Set(files.map(f => path.resolve(f)));
   const stats = { files: 0, newSongs: 0, updated: 0, removed: 0 };
@@ -109,8 +162,10 @@ export async function scanLibrary(): Promise<ScanResult> {
         }
       }
 
-      // Pre-transcode ALAC → AAC, biar playback instan (cache di data/transcodes/)
-      if (format === 'm4a' && parsed.codec === 'alac') playablePathFor(songId, file, format, 'alac');
+      // Pre-transcode ALAC → AAC saat scan, biar playback instan (cache di data/transcodes/)
+      if (['m4a', 'm4b', 'm4p'].includes(format) && isAlacCodec(format, parsed.codec, file)) {
+        transcodeSong(songId, file);
+      }
 
       // LRC: cari file .lrc se-nama di folder sama (satu per lagu)
       const lrcPath = file.slice(0, -path.extname(file).length) + '.lrc';
@@ -144,6 +199,7 @@ export async function scanLibrary(): Promise<ScanResult> {
     throw e;
   } finally {
     conn.release();
+    releaseScanLock();
   }
 
   const [artistRows] = await pool.query<any[]>('SELECT COUNT(*) AS c FROM artists');
