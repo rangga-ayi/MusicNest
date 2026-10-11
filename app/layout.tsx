@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { DM_Sans } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
@@ -14,9 +14,46 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Music Nest",
-  description: "Aplikasi streaming musik pribadi",
-  icons: { icon: "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>" },
+  title: {
+    default: "MusicNest — Pemutar Musik Pribadi & Self-Hosted Library",
+    template: "%s | MusicNest",
+  },
+  description:
+    "Aplikasi streaming musik pribadi modern berbasis web yang self-hosted di jaringan lokal. Dirancang dengan Next.js 16, React 19, Tailwind CSS v4, dan MySQL.",
+  keywords: [
+    "MusicNest",
+    "music streamer",
+    "self-hosted",
+    "local music player",
+    "Next.js",
+    "React 19",
+    "Tailwind CSS",
+    "MySQL",
+  ],
+  authors: [{ name: "MusicNest" }],
+  openGraph: {
+    type: "website",
+    locale: "id_ID",
+    siteName: "MusicNest",
+    title: "MusicNest — Pemutar Musik Pribadi & Self-Hosted Library",
+    description:
+      "Pemutar musik pribadi modern berbasis web untuk koleksi audio lokal Anda dengan antarmuka responsif dan audio streaming cepat.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MusicNest — Pemutar Musik Pribadi & Self-Hosted Library",
+    description:
+      "Aplikasi pemutar musik pribadi modern berbasis web yang self-hosted di jaringan lokal.",
+  },
+  icons: {
+    icon: "/icon.svg",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0b0b0f",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

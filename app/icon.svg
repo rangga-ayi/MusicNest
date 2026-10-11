@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none">
+  <defs>
+    <linearGradient id="musicnest-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1ed760" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+  </defs>
+  <!-- Background rounded squircle -->
+  <rect width="32" height="32" rx="8" fill="#151519" />
+  <rect x="0.5" y="0.5" width="31" height="31" rx="7.5" stroke="#2e2e38" stroke-width="1" />
+  <!-- Music note icon -->
+  <path d="M12 21.5a2.5 2.5 0 1 1-2.5-2.5c.34 0 .66.07.96.19V9.5a1 1 0 0 1 .78-.98l9-2a1 1 0 0 1 1.22.98v4.5a2.5 2.5 0 1 1-2.5-2.5c.34 0 .66.07.96.19V8.86l-7 1.56v8.77a2.5 2.5 0 0 1-.42-.19z" fill="url(#musicnest-grad)" />
+</svg>
